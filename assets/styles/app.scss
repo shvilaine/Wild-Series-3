@@ -1,0 +1,21 @@
+@import "~bootstrap/scss/bootstrap";
+
+$primary: #5866b1;
+$secondary: #ff4136;
+$dark: #111217;
+$medium: #a7abc1;
+$light: #e8e9ef;
+
+
+.navbar {
+  background-color: $primary;
+}
+
+.navbar-brand,
+.nav-link {
+  color: $light;
+}
+
+body {
+  background-color: $light;
+}
