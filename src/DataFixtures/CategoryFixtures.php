@@ -13,26 +13,19 @@ class CategoryFixtures extends Fixture
         'Animation',
         'Aventure',
         'Comédie',
-        'Documentaire',
-        'Drame',
         'Fantastique',
-        'Histoire',
-        'Horreur',
         'Mystère',
         'Romance',
         'Science-Fiction',
-        'Suspense',
-        'Thriller',
-        'Western',
     ];
 
     public function load(ObjectManager $manager)
     {
-        foreach (self::CATEGORIES as $key => $categoryName) {
+        foreach (self::CATEGORIES as $categoryName) {
             $category = new Category();
             $category->setName($categoryName);
-
             $manager->persist($category);
+            $this->addReference('categorie_' . $categoryName, $category);
         }
         $manager->flush();
     }
