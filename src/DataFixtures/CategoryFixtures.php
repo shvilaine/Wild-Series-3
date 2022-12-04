@@ -24,8 +24,8 @@ class CategoryFixtures extends Fixture
         foreach (self::CATEGORIES as $categoryName) {
             $category = new Category();
             $category->setName($categoryName);
+            $this->addReference('category_' . $categoryName, $category);
             $manager->persist($category);
-            $this->addReference('categorie_' . $categoryName, $category);
         }
         $manager->flush();
     }
