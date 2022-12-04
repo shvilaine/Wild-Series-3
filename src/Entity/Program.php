@@ -36,7 +36,7 @@ class Program
     {
         $this->seasons = new ArrayCollection();
     }
- 
+
     public function getId(): ?int
     {
         return $this->id;
@@ -102,7 +102,7 @@ class Program
     {
         if (!$this->seasons->contains($season)) {
             $this->seasons->add($season);
-            $season->setProgramId($this);
+            $season->setProgram($this);
         }
 
         return $this;
@@ -112,8 +112,8 @@ class Program
     {
         if ($this->seasons->removeElement($season)) {
             // set the owning side to null (unless already changed)
-            if ($season->getProgramId() === $this) {
-                $season->setProgramId(null);
+            if ($season->getProgram() === $this) {
+                $season->setProgram(null);
             }
         }
 
