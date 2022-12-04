@@ -11,10 +11,13 @@
 			<p>{{ program.synopsis }}</p>
 			<p>Catégorie :
 				{{ program.category.name }}</p>
-		</div>
-	</div>
+			<p>Saisons disponibles :
+					{{ program.seasons }}</p>
+			</p>
 
-	<a href="{{ path('program_index') }}">
-		Retour à la liste des programmes
-	</a>
-{% endblock %}
+	</div>
+</div>
+
+<a href="{{ path('program_index') }}">
+	Retour à la liste des programmes
+</a>{% endblock %}
