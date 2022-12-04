@@ -16,7 +16,7 @@ class ProgramType extends AbstractType
             ->add('title', TextType::class)
             ->add('synopsis', TextType::class)
             ->add('poster', TextType::class)
-            ->add('category');
+            ->add('category', null, ['choice_label' => 'name']);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
