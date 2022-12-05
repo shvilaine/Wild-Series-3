@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Repository\CategoryRepository;
+
 use App\Repository\EpisodeRepository;
 use App\Repository\ProgramRepository;
 use App\Repository\SeasonRepository;
@@ -88,7 +88,7 @@ class ProgramController extends AbstractController
         );
     }
 
-    #[Route('/{program}/seasons/{season}/episode/{episode]', name: 'episode_show')]
+    #[Route('/{program}/seasons/{season}/episode/{episode}', name: 'episode_show')]
     public function showEpisode(Program $program, Season $season, Episode $episode): Response
     {
         return $this->render(
