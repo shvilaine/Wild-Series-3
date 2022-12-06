@@ -27,7 +27,7 @@ class Program
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Ne me laisse pas tout vide')]
-    #[Assert\Regex(pattern: '^[P-P][p-p]lus belle la vie', message: 'On parle de vraies séries ici!')]
+    #[Assert\Regex(pattern: '/([Pp]lus belle la vie)/', match: false, message: 'On parle de vraies séries ici')]
     private ?string $synopsis = null;
 
     #[ORM\Column(length: 255, nullable: true)]
