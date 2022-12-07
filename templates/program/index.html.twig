@@ -6,6 +6,7 @@
 
 {% block body %}
 	<h1>Toutes les séries de la table program :
+		{{ app.session.get('total') }}
 	</h1>
 	{% for program in programs %}
 
