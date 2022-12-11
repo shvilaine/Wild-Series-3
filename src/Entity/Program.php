@@ -27,7 +27,7 @@ class Program
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Ne me laisse pas tout vide')]
-    #[Assert\Regex(pattern: '^[P-P][p-p]lus belle la vie', message: 'On parle de vraies séries ici!')]
+    #[Assert\Regex(pattern: '/([Pp]lus belle la vie)/', match: false, message: 'On parle de vraies séries ici')]
     private ?string $synopsis = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -40,9 +40,13 @@ class Program
     #[ORM\OneToMany(mappedBy: 'program', targetEntity: Season::class, orphanRemoval: true)]
     private Collection $seasons;
 
+    #[ORM\ManyToMany(targetEntity: Actor::class, mappedBy: 'programs')]
+    private Collection $actors;
+
     public function __construct()
     {
         $this->seasons = new ArrayCollection();
+        $this->actors = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,6 +127,33 @@ class Program
             if ($season->getProgram() === $this) {
                 $season->setProgram(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Actor>
+     */
+    public function getActors(): Collection
+    {
+        return $this->actors;
+    }
+
+    public function addActor(Actor $actor): self
+    {
+        if (!$this->actors->contains($actor)) {
+            $this->actors->add($actor);
+            $actor->addProgram($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActor(Actor $actor): self
+    {
+        if ($this->actors->removeElement($actor)) {
+            $actor->removeProgram($this);
         }
 
         return $this;

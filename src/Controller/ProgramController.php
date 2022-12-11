@@ -14,11 +14,13 @@ use App\Entity\Program;
 use App\Entity\Season;
 use App\Entity\Episode;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 #[Route('/program', name: 'program_')]
 class ProgramController extends AbstractController
 {
     #[Route('/', name: 'index')]
-    public function index(ProgramRepository $programRepository): Response
+    public function index(ProgramRepository $programRepository, Request $request): Response
     {
         $programs = $programRepository->findAll();
 
@@ -30,20 +32,19 @@ class ProgramController extends AbstractController
         );
     }
 
-    #[Route('/new', name: 'new')]
+    #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, ProgramRepository $programRepository): Response
     {
         $program = new Program();
 
         // Create the form, linked with $category
         $form = $this->createForm(CategoryType::class, $program);
-
-        // Get data from HTTP request
         $form->handleRequest($request);
 
-        // Was the form submitted ?
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $programRepository->save($program, true);
+
+            $this->addFlash('success', 'The new program has been created');
             return $this->redirectToRoute('program_index');
         }
 
@@ -99,6 +100,18 @@ class ProgramController extends AbstractController
                 'episode' => $episode,
             ]
         );
+    }
+
+    #[Route('/{id}', name: '_delete', methods: ['POST'])]
+    public function delete(Request $request, Season $season, SeasonRepository $seasonRepository): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $season->getId(), $request->request->get('_token'))) {
+            $seasonRepository->remove($season, true);
+
+            $this->addFlash('danger', 'This program has been deleted');
+        }
+
+        return $this->redirectToRoute('app_season_index', [], Response::HTTP_SEE_OTHER);
     }
 }
 /*     public function new(): Response
