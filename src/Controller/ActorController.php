@@ -11,15 +11,13 @@ use App\Entity\Actor;
 #[Route('/actor', name: 'actor_')]
 class ActorController extends AbstractController
 {
-    #[Route('/', name: 'index')]
+    #[Route('/', name: 'index', methods: ['GET'])]
     public function index(ActorRepository $actorRepository): Response
     {
-        $actors = $actorRepository->findAll();
-
         return $this->render(
             'actor/index.html.twig',
             [
-                'actors' => $actors,
+                'actors' => $actorRepository->findAll(),
             ]
         );
     }
@@ -27,8 +25,6 @@ class ActorController extends AbstractController
     #[Route('/{id}', methods: ['GET'], name: 'show')]
     public function show(Actor $actor): Response
     {
-        $programs = $actor->getPrograms();
-
         return $this->render(
             'actor/show.html.twig',
             [

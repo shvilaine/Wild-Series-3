@@ -146,7 +146,7 @@ class Program
             $this->actors->add($actor);
             $actor->addProgram($this);
         }
-
+        $this->actors[] = $actor;
         return $this;
     }
 
