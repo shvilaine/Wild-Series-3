@@ -15,7 +15,7 @@ class ActorFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create();
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i < 11; $i++) {
             $actor = new Actor();
             $actor->setName($faker->name());
 
