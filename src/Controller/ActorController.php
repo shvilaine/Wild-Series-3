@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\ActorRepository;
 use App\Entity\Actor;
 
-#[Route('/actor', name: 'actor_')]
+#[Route('/actor', name: 'actor_', method: ['GET'])]
 class ActorController extends AbstractController
 {
     #[Route('/', name: 'index')]
