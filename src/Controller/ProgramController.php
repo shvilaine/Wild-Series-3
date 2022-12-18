@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,18 +11,20 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\EpisodeRepository;
 use App\Repository\ProgramRepository;
 use App\Repository\SeasonRepository;
+use App\Service\ProgramDuration;
 use App\Entity\Program;
 use App\Entity\Season;
 use App\Entity\Episode;
-
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/program', name: 'program_')]
 class ProgramController extends AbstractController
 {
-    #[Route('/', name: 'index')]
-    public function index(ProgramRepository $programRepository, Request $request): Response
+    #[Route('/', methods:['GET'], name: 'index')]
+    public function index(RequestStack $requestStack, ProgramRepository $programRepository): Response
     {
+        $session = $requestStack->getSession();
         $programs = $programRepository->findAll();
 
         return $this->render(
@@ -33,7 +36,7 @@ class ProgramController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, ProgramRepository $programRepository): Response
+    public function new(Request $request, ProgramRepository $programRepository, SluggerInterface $slugger): Response
     {
         $program = new Program();
 
@@ -42,6 +45,9 @@ class ProgramController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $slug = $slugger->slug($program->getTitle());
+            $program->setSlug($slug);
+            
             $programRepository->save($program, true);
 
             $this->addFlash('success', 'The new program has been created');
@@ -50,14 +56,18 @@ class ProgramController extends AbstractController
 
         // Render the form (best practice)
         return $this->renderForm('program/new.html.twig', [
+            'program' => $program,
             'form' => $form,
         ]);
     }
 
     #[Route('/{program}', methods: ['GET'], name: 'show')]
-    public function show(Program $program, SeasonRepository $seasonRepository): Response
+    public function show(Program $program, SeasonRepository $seasonRepository, SluggerInterface $slugger, ProgramDuration $programDuration): Response
     {
         $seasons = $seasonRepository->findBy(['program' => $program]);
+
+        $slug = $slugger->slug($program->getTitle());
+        $program->setSlug($slug);
 
         if (!$program) {
             throw $this->createNotFoundException(
@@ -70,6 +80,7 @@ class ProgramController extends AbstractController
             [
                 'program' => $program,
                 'seasons' => $seasons,
+                'programDuration' => $programDuration->calculate($program),
             ]
         );
     }

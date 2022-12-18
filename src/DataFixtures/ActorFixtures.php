@@ -20,7 +20,7 @@ class ActorFixtures extends Fixture implements DependentFixtureInterface
             $actor->setName($faker->name());
 
             for ($j = 1; $j <= 3; $j++) {
-                $actor->addProgram($this->getReference('program_' . $faker->numberBetween(1, 3)));
+                $actor->addProgram($this->getReference('category_' . CategoryFixtures::CATEGORIES[$faker->numberBetween(1, 7)] . '_program_' . $faker->numberBetween(1, 3)));
             }
             $manager->persist($actor);
         }

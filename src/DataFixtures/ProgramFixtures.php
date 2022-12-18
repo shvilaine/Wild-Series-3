@@ -8,10 +8,17 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 use Faker\Factory;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ProgramFixtures extends Fixture implements DependentFixtureInterface
 {
     public const NB_PROGRAMS = 5;
+    private SluggerInterface $slugger;
+
+    public function __construct(SluggerInterface $slugger)
+    {
+        $this->slugger = $slugger;
+    }
 
     public function load(ObjectManager $manager): void
     {
@@ -23,6 +30,8 @@ class ProgramFixtures extends Fixture implements DependentFixtureInterface
                 $program->setTitle('program' . $categoryName . $i);
                 $program->setSynopsis($faker->paragraphs(2, true));
                 $program->setCategory($this->getReference('category_' . $categoryName));
+
+                $program->setSlug($this->slugger->slug($program->getTitle()));
                 $this->addReference('category_' . $categoryName . '_program_' . $i, $program);
                 $manager->persist($program);
             }
