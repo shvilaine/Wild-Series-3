@@ -1,0 +1,20 @@
+{% extends 'layoutEmail.html.twig' %}
+
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>Brand new episode | {{ episode.title }}</title>
+	</head>
+
+	<body>
+		<h1>New episode
+			{{ episode.title }}
+			created</h1>
+		<p>Hello, the new episode
+			{{ episode.title }}
+			has been created on Wild Series</p>
+		<p>Synopsis :
+			{{episode.synopsis }}</p>
+	</body>
+</html>

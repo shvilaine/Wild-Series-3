@@ -17,11 +17,13 @@ use App\Entity\Season;
 use App\Entity\Episode;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 #[Route('/program', name: 'program_')]
 class ProgramController extends AbstractController
 {
-    #[Route('/', methods:['GET'], name: 'index')]
+    #[Route('/', methods: ['GET'], name: 'index')]
     public function index(RequestStack $requestStack, ProgramRepository $programRepository): Response
     {
         $session = $requestStack->getSession();
@@ -36,7 +38,7 @@ class ProgramController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, ProgramRepository $programRepository, SluggerInterface $slugger): Response
+    public function new(Request $request, MailerInterface $mailer, ProgramRepository $programRepository, SluggerInterface $slugger): Response
     {
         $program = new Program();
 
@@ -47,8 +49,15 @@ class ProgramController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $slug = $slugger->slug($program->getTitle());
             $program->setSlug($slug);
-            
+
             $programRepository->save($program, true);
+
+            $email = (new Email())
+                ->from($this->getParameter('mailer_from'))
+                ->to('severine.vilaine@gmail.com')
+                ->subject('Une nouvelle série vient d\'être publiée !')
+                ->html($this->renderView('Program/newProgramEmail.html.twig', ['program' => $program]));
+            $mailer->send($email);
 
             $this->addFlash('success', 'The new program has been created');
             return $this->redirectToRoute('program_index');
