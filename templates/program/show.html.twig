@@ -7,6 +7,7 @@
 {% block body %}
 	<div class="media">
 		<h1>{{ program.title }}</h1>
+		<img src="{{ vich_uploader_asset(program) }}" alt="{{ program.title }}">
 		<p>{{ program.synopsis }}</p>
 		<p>Catégorie :
 			{{ program.category.name }}</p>
