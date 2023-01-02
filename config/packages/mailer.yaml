@@ -2,4 +2,3 @@ framework:
   mailer:
     dsn: "%env(MAILER_DSN)%"
     message_bus: false
-    mailer_from: "%env(resolve:MAILER_FROM_ADDRESS)%"

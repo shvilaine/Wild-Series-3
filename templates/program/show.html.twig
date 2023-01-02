@@ -7,9 +7,14 @@
 {% block body %}
 	<div class="media">
 		<h1>{{ program.title }}</h1>
+		<img src="{{ vich_uploader_asset(program) }}" alt="{{ program.title }}">
 		<p>{{ program.synopsis }}</p>
 		<p>Catégorie :
 			{{ program.category.name }}</p>
+
+		{% if is_granted("ROLE_ADMIN") or program.owner == app.user %}
+			<a href="{{ path('program_edit', { 'slug': program.slug} ) }}">Éditer</a>
+		{% endif %}
 
 		{% for season in program.seasons %}
 			<h3>{{ season.number }}</h3>
@@ -27,4 +32,8 @@
 			{% endfor %}
 		</ul>
 	</div>
-</div></div>{% else %}<h2>Aucune série trouvée.</h2>{% endfor %}</div><a href="{{ path('program_index') }}">Retour à la liste des programmes</a>{% endblock %}
+</div></div>{% else %}<h2>Aucune série trouvée.</h2>
+{% endfor %}</div>
+
+<a href="{{ path('program_index') }}">Retour à la liste des programmes</a>
+{% endblock %}

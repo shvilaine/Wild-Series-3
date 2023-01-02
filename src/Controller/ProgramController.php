@@ -7,14 +7,17 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 use App\Repository\EpisodeRepository;
 use App\Repository\ProgramRepository;
 use App\Repository\SeasonRepository;
 use App\Service\ProgramDuration;
+use App\Entity\Comment;
 use App\Entity\Program;
 use App\Entity\Season;
 use App\Entity\Episode;
+use App\Repository\CommentRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -24,15 +27,23 @@ use Symfony\Component\Mime\Email;
 class ProgramController extends AbstractController
 {
     #[Route('/', methods: ['GET'], name: 'index')]
-    public function index(RequestStack $requestStack, ProgramRepository $programRepository): Response
+    public function index(Request $request, ProgramRepository $programRepository): Response
     {
-        $session = $requestStack->getSession();
-        $programs = $programRepository->findAll();
+        $form = $this->createForm(SearchProgramType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $search = $form->getData()['search'];
+            $programs = $programRepository->findLikeName($search);
+        } else {
+            $programs = $programRepository->findAll();
+        }
 
         return $this->render(
             'program/index.html.twig',
             [
-                'programs' => $programs
+                'programs' => $programs,
+                'form' => $form,
             ]
         );
     }
@@ -49,6 +60,9 @@ class ProgramController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $slug = $slugger->slug($program->getTitle());
             $program->setSlug($slug);
+
+            // Set the program's owner
+            $program->setOwner($this->getUser());
 
             $programRepository->save($program, true);
 
@@ -94,6 +108,28 @@ class ProgramController extends AbstractController
         );
     }
 
+    #[Route('/{slug}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Program $program, ProgramRepository $programRepository): Response
+    {
+        if ($this->getUser() !== $program->getOwner()) {
+            throw $this->createAccessDeniedException('Only the owner can edit the program!');
+        }
+
+        $form = $this->createForm(ProgramType::class, $program);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $programRepository->save($program, true);
+
+            return $this->redirectToRoute('program_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('program/edit.html.twig', [
+            'program' => $program,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/{program}/seasons/{season}', name: 'season_show')]
     public function showSeason(Program $program, Season $season, EpisodeRepository $episodeRepository): Response
     {
@@ -110,14 +146,41 @@ class ProgramController extends AbstractController
     }
 
     #[Route('/{program}/seasons/{season}/episode/{episode}', name: 'episode_show')]
-    public function showEpisode(Program $program, Season $season, Episode $episode): Response
+    public function showEpisode(Request $request, Program $program, Season $season, Episode $episode, CommentRepository $commentRepository): Response
     {
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        $user = $this->getUser();
+
+        $commentsAndRate = $commentRepository->findBy(
+            ['episode' => $episode],
+            ['id' => 'ASC']
+        );
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setAuthor($user);
+            $comment->setEpisode($episode);
+            $commentRepository->save($comment, true);
+            $this->addFlash('success', 'The comment has been posted !');
+            return $this->redirectToRoute('program_episode_show', [
+                'program' => $program->getId(),
+                'season' => $season->getId(),
+                'episode' => $episode->getId(),
+            ]);
+        }
+
         return $this->render(
             'program/episode_show.html.twig',
             [
                 'program' => $program,
                 'season' => $season,
                 'episode' => $episode,
+                'form' => $form,
+                'user' => $user,
+                'comment' => $comment,
+                'commentsAndRate' => $commentsAndRate,
             ]
         );
     }

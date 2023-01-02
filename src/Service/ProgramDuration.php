@@ -8,12 +8,12 @@ class ProgramDuration
 {
     public function calculate(Program $program): string
     {
-        $duration = 0;
+        $duration = 1;
         foreach ($program->getSeasons() as $season) {
             foreach ($season->getEpisodes() as $episode) {
                 $duration += $episode->getDuration();
             }
         }
-        return $duration;
+        return strval($duration);
     }
 }
