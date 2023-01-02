@@ -23,10 +23,13 @@
 	{{ include('comment/_form.html.twig') }}
 </div>{% endif %}{% for comment in allComments %}
 <div class="comment">
-	<h3>De
+	<h3>Auteur:
 		{{ comment.author.username }}</h3>
 	<p>{{ comment.comment }}
-		<br>Ma note :
+		<br>Note :
 		{{ comment.rate }}</p>
+	{% if is_granted("ROLE_ADMIN") or comment.author == app.user %}
+		{{ include('comment/_delete_form.html.twig') }}
+	{% endif %}
 </div>{% endfor %}<a href="{{ path('program_index') }}">
 Retour à la liste des programmes</a>{% endblock %}

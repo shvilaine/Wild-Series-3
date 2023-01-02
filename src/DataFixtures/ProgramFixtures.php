@@ -43,6 +43,7 @@ class ProgramFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             CategoryFixtures::class,
+            UserFixtures::class,
         ];
     }
 }
