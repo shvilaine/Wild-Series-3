@@ -27,6 +27,8 @@ class UserFixtures extends Fixture
 
         );
         $user->setPassword($hashedPassword);
+        $user->setRoles(array($user['role']));
+        $this->addReference('user_' . self::class, $user);
         $manager->persist($user);
 
         $contributor = new User();
@@ -37,8 +39,10 @@ class UserFixtures extends Fixture
             'contributorpassword'
 
         );
-        $user->setPassword($hashedPassword);
-        $manager->persist($user);
+        $contributor->setPassword($hashedPassword);
+        $contributor->setRoles(array($contributor['role']));
+        $this->addReference('user_' . self::class, $contributor);
+        $manager->persist($contributor);
 
         $admin = new User();
         $admin->setEmail('admin@monsite.com');
@@ -48,6 +52,8 @@ class UserFixtures extends Fixture
             'adminpassword'
         );
         $admin->setPassword($hashedPassword);
+        $admin->setRoles(array($admin['role']));
+        $this->addReference('admin_' . self::class, $admin);
         $manager->persist($admin);
 
         $manager->flush();

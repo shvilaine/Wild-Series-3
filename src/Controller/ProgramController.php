@@ -27,15 +27,23 @@ use Symfony\Component\Mime\Email;
 class ProgramController extends AbstractController
 {
     #[Route('/', methods: ['GET'], name: 'index')]
-    public function index(RequestStack $requestStack, ProgramRepository $programRepository): Response
+    public function index(Request $request, ProgramRepository $programRepository): Response
     {
-        $session = $requestStack->getSession();
-        $programs = $programRepository->findAll();
+        $form = $this->createForm(SearchProgramType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $search = $form->getData()['search'];
+            $programs = $programRepository->findLikeName($search);
+        } else {
+            $programs = $programRepository->findAll();
+        }
 
         return $this->render(
             'program/index.html.twig',
             [
-                'programs' => $programs
+                'programs' => $programs,
+                'form' => $form,
             ]
         );
     }
