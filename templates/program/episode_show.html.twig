@@ -4,17 +4,29 @@
 {% endblock %}
 
 {% block body %}
-	<div class="media">
-		<img class="align-self-start mr-3" src="{{program.poster}}" alt="{{ program.title }} poster">
-		<div class="media-body">
-			<h1 class="mt-0">{{ program.title }}</h1>
-			<p>saison :
-				{{ season.id }}</p>
-			<p>{{ episode.id }}</p>
-			<p>{{ episode.number }}</p>
-			<p>{{ episode.title }}</p>
-			<p>{{ episode.synopsis }}</p>
-		</div>
+<div class="media">
+	<img class="align-self-start mr-3" src="{{program.poster}}" alt="{{ program.title }} poster">
+	<div class="media-body">
+		<h1 class="mt-0">{{ program.title }}</h1>
+		<p>saison :
+			{{ season.id }}</p>
+		<p>{{ episode.id }}</p>
+		<p>{{ episode.number }}</p>
+		<p>{{ episode.title }}</p>
+		<p>{{ episode.synopsis }}</p>
+		<a href="{{ path("program_show", { slug: program.slug }) }}" class="btn btn-primary">Voir la fiche</a>
 	</div>
+</div>
 
-{% endblock %}
+{% if app.user %}
+	<h2>Ajouter un commentaire à l'épisode :</h2>
+	{{ include('comment/_form.html.twig') }}
+</div>{% endif %}{% for comment in allComments %}
+<div class="comment">
+	<h3>De
+		{{ comment.author.username }}</h3>
+	<p>{{ comment.comment }}
+		<br>Ma note :
+		{{ comment.rate }}</p>
+</div>{% endfor %}<a href="{{ path('program_index') }}">
+Retour à la liste des programmes</a>{% endblock %}

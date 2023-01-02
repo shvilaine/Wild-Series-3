@@ -12,9 +12,11 @@ use App\Repository\EpisodeRepository;
 use App\Repository\ProgramRepository;
 use App\Repository\SeasonRepository;
 use App\Service\ProgramDuration;
+use App\Entity\Comment;
 use App\Entity\Program;
 use App\Entity\Season;
 use App\Entity\Episode;
+use App\Repository\CommentRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -110,14 +112,41 @@ class ProgramController extends AbstractController
     }
 
     #[Route('/{program}/seasons/{season}/episode/{episode}', name: 'episode_show')]
-    public function showEpisode(Program $program, Season $season, Episode $episode): Response
+    public function showEpisode(Request $request, Program $program, Season $season, Episode $episode, CommentRepository $commentRepository): Response
     {
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        $user = $this->getUser();
+
+        $commentsAndRate = $commentRepository->findBy(
+            ['episode' => $episode],
+            ['id' => 'ASC']
+        );
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setAuthor($user);
+            $comment->setEpisode($episode);
+            $commentRepository->save($comment, true);
+            $this->addFlash('success', 'The comment has been posted !');
+            return $this->redirectToRoute('program_episode_show', [
+                'program' => $program->getId(),
+                'season' => $season->getId(),
+                'episode' => $episode->getId(),
+            ]);
+        }
+        
         return $this->render(
             'program/episode_show.html.twig',
             [
                 'program' => $program,
                 'season' => $season,
                 'episode' => $episode,
+                'form' => $form,
+                'user' => $user,
+                'comment' => $comment,
+                'commentsAndRate' => $commentsAndRate,
             ]
         );
     }
